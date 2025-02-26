@@ -16,7 +16,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { ChatInterface } from '@/components/chat-interface';
+// import { ChatInterface } from '@/components/chat-interface';
 
 interface FloatingElementProps {
   children: ReactNode;
@@ -217,13 +217,13 @@ const Footer = () => (
         <div>
           <h3 className="text-lg font-bold mb-4">Connect</h3>
           <div className="flex space-x-4">
-            <a href="https://github.com/hallelx2" className="hover:text-primary transition-colors">
+            <a title="Github" href="https://github.com/hallelx2" className="hover:text-primary transition-colors">
               <Github className="w-5 h-5" />
             </a>
-            <a href="mailto:halleluyaholudele@gmail.com" className="hover:text-primary transition-colors">
+            <a title="Gmail" href="mailto:halleluyaholudele@gmail.com" className="hover:text-primary transition-colors">
               <Mail className="w-5 h-5" />
             </a>
-            <a href="#" className="hover:text-primary transition-colors">
+            <a title="LinkedIn" href="#" className="hover:text-primary transition-colors">
               <Linkedin className="w-5 h-5" />
             </a>
           </div>
@@ -375,43 +375,43 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <motion.header 
+      <motion.header
         className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
         <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <motion.span 
+          <motion.span
             className="text-xl font-bold"
             whileHover={{ scale: 1.05 }}
           >
             HDO
           </motion.span>
           <div className="flex gap-6">
-            <motion.a 
-              href="#skills" 
+            <motion.a
+              href="#skills"
               className="hover:text-primary transition-colors"
               whileHover={{ y: -2 }}
             >
               Skills
             </motion.a>
-            <motion.a 
-              href="#projects" 
+            <motion.a
+              href="#projects"
               className="hover:text-primary transition-colors"
               whileHover={{ y: -2 }}
             >
               Projects
             </motion.a>
-            <motion.a 
-              href="#achievements" 
+            <motion.a
+              href="#achievements"
               className="hover:text-primary transition-colors"
               whileHover={{ y: -2 }}
             >
               Achievements
             </motion.a>
-            <motion.a 
-              href="#contact" 
+            <motion.a
+              href="#contact"
               className="hover:text-primary transition-colors"
               whileHover={{ y: -2 }}
             >
@@ -423,13 +423,13 @@ export default function Home() {
 
       <main className="relative">
         <div ref={containerRef} className="h-screen relative overflow-hidden">
-          <motion.div 
+          <motion.div
             className="absolute inset-0 flex items-center justify-center"
             style={{ y, opacity }}
           >
             <div className="container mx-auto px-4 text-center relative">
               <FloatingElement delay={0}>
-                <motion.h1 
+                <motion.h1
                   className="text-6xl font-bold mb-4"
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -438,31 +438,31 @@ export default function Home() {
                   Halleluyah Darasimi Oludele
                 </motion.h1>
               </FloatingElement>
-              
+
               <FloatingElement delay={0.2}>
                 <h2 className="text-2xl text-muted-foreground mb-6">Software Engineer</h2>
               </FloatingElement>
 
               <FloatingElement delay={0.4}>
                 <div className="flex justify-center gap-4 mb-8">
-                  <motion.a 
-                    href="https://github.com/hallelx2" 
+                  <motion.a
+                    href="https://github.com/hallelx2"
                     className="hover:text-primary transition-colors"
                     whileHover={{ scale: 1.2, rotate: 360 }}
                     transition={{ type: "spring", stiffness: 260, damping: 20 }}
                   >
                     <Github className="w-6 h-6" />
                   </motion.a>
-                  <motion.a 
-                    href="mailto:halleluyaholudele@gmail.com" 
+                  <motion.a
+                    href="mailto:halleluyaholudele@gmail.com"
                     className="hover:text-primary transition-colors"
                     whileHover={{ scale: 1.2, rotate: 360 }}
                     transition={{ type: "spring", stiffness: 260, damping: 20 }}
                   >
                     <Mail className="w-6 h-6" />
                   </motion.a>
-                  <motion.a 
-                    href="#" 
+                  <motion.a
+                    href="#"
                     className="hover:text-primary transition-colors"
                     whileHover={{ scale: 1.2, rotate: 360 }}
                     transition={{ type: "spring", stiffness: 260, damping: 20 }}
@@ -501,7 +501,7 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 py-16 max-w-6xl">
-          <motion.section 
+          <motion.section
             id="skills"
             className="mb-16"
             initial={{ opacity: 0, y: 50 }}
@@ -519,7 +519,7 @@ export default function Home() {
 
           <Separator className="my-16" />
 
-          <motion.section 
+          <motion.section
             id="projects"
             className="mb-16"
             initial={{ opacity: 0, y: 50 }}
@@ -535,7 +535,7 @@ export default function Home() {
             </div>
           </motion.section>
 
-          <motion.section 
+          <motion.section
             id="achievements"
             className="mb-16"
             initial={{ opacity: 0, y: 50 }}
@@ -573,8 +573,8 @@ export default function Home() {
               ].map((achievement, index) => (
                 <HoverCard key={index}>
                   <HoverCardTrigger asChild>
-                    <motion.div 
-                      whileHover={{ scale: 1.02 }} 
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
                       transition={{ type: "spring", stiffness: 400, damping: 10 }}
                     >
                       <Card>
@@ -598,7 +598,7 @@ export default function Home() {
             </div>
           </motion.section>
 
-          <motion.section 
+          <motion.section
             id="contact"
             className="max-w-2xl mx-auto"
             initial={{ opacity: 0, y: 50 }}
@@ -654,7 +654,7 @@ export default function Home() {
       </main>
 
       <Footer />
-      <ChatInterface />
+      {/* <ChatInterface /> */}
     </div>
   );
 }
