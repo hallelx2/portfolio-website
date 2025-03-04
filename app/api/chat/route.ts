@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     });
 
     const result = await chat.sendMessage([{ text: messages[messages.length - 1].content }]);
-    const response = await result.response;
+    const response = result.response;
     const text = response.text();
 
     // Generate suggestions
@@ -97,7 +97,7 @@ async function generateSuggestedQuestions(context: string) {
   Make the questions natural and contextual.`;
 
   const result = await model.generateContent(prompt);
-  const response = await result.response;
+  const response = result.response;
   try {
     return JSON.parse(response.text());
   } catch {
