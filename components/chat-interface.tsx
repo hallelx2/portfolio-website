@@ -10,20 +10,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
 type MessageType = 'user' | 'bot';
 
 interface Message {
   type: MessageType;
   content: string;
-}
-
-interface CodeBlockProps {
-  inline?: boolean;
-  className?: string;
-  children: React.ReactNode;
 }
 
 export function ChatInterface() {
@@ -89,28 +81,17 @@ export function ChatInterface() {
     }
   };
 
-  const messageVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
-
   return (
     <>
-      <motion.div
-        className="fixed bottom-4 right-4 z-50"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 260, damping: 20 }}
-      >
+      <div className="fixed bottom-4 right-4 z-50">
         <Button
           onClick={() => setIsOpen(!isOpen)}
           className="w-12 h-12 rounded-full shadow-lg hover:shadow-xl transition-shadow"
           size="icon"
-          variant="default"
         >
           {isOpen ? <X className="w-5 h-5" /> : <MessageSquare className="w-5 h-5" />}
         </Button>
-      </motion.div>
+      </div>
 
       <AnimatePresence>
         {isOpen && (
@@ -118,14 +99,13 @@ export function ChatInterface() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="fixed bottom-20 right-4 w-[350px] z-50"
           >
             <Card className="shadow-xl border-2">
               <CardHeader className="border-b bg-primary/5">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Bot className="w-5 h-5" />
-                  Chat with HDO's Assistant
+                  Chat with HDO&apos;s Assistant
                 </CardTitle>
               </CardHeader>
               <ScrollArea className="h-[400px] p-4" ref={scrollAreaRef}>
@@ -133,32 +113,25 @@ export function ChatInterface() {
                   {messages.map((message, index) => (
                     <motion.div
                       key={index}
-                      variants={messageVariants}
-                      initial="hidden"
-                      animate="visible"
-                      transition={{ delay: 0.1 * index }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
                       className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div
-                        className={`flex gap-2 items-start max-w-[80%] ${
-                          message.type === 'user' ? 'flex-row-reverse' : 'flex-row'
-                        }`}
-                      >
+                      <div className={`flex gap-2 items-start max-w-[80%] ${
+                        message.type === 'user' ? 'flex-row-reverse' : 'flex-row'
+                      }`}>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                           message.type === 'user' ? 'bg-primary' : 'bg-secondary'
                         }`}>
                           {message.type === 'user' ?
                             <User className="w-4 h-4 text-primary-foreground" /> :
-                            <Bot className="w-4 h-4" />
-                          }
+                            <Bot className="w-4 h-4" />}
                         </div>
-                        <div
-                          className={`rounded-lg p-3 ${
-                            message.type === 'user'
-                              ? 'bg-primary text-primary-foreground'
-                              : 'bg-secondary/50'
-                          }`}
-                        >
+                        <div className={`rounded-lg p-3 ${
+                          message.type === 'user'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-secondary/50'
+                        }`}>
                           <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             className="prose prose-sm dark:prose-invert max-w-none"
@@ -169,6 +142,7 @@ export function ChatInterface() {
                       </div>
                     </motion.div>
                   ))}
+
                   {isLoading && (
                     <motion.div
                       initial={{ opacity: 0 }}
@@ -179,6 +153,26 @@ export function ChatInterface() {
                         <Loader2 className="w-4 h-4 animate-spin" />
                       </div>
                     </motion.div>
+                  )}
+
+                  {!isLoading && suggestedQuestions.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <p className="text-xs text-muted-foreground">Suggested questions:</p>
+                      {suggestedQuestions.map((question, index) => (
+                        <Button
+                          key={index}
+                          variant="ghost"
+                          className="w-full justify-start text-sm"
+                          onClick={() => {
+                            setInput(question);
+                            handleSend();
+                          }}
+                        >
+                          <ChevronRight className="w-3 h-3 mr-2" />
+                          {question}
+                        </Button>
+                      ))}
+                    </div>
                   )}
                 </div>
               </ScrollArea>
@@ -205,8 +199,7 @@ export function ChatInterface() {
                   >
                     {isLoading ?
                       <Loader2 className="w-4 h-4 animate-spin" /> :
-                      <Send className="w-4 h-4" />
-                    }
+                      <Send className="w-4 h-4" />}
                   </Button>
                 </form>
               </CardContent>
