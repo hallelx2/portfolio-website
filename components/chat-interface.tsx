@@ -12,13 +12,18 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import type { CodeProps } from 'react-markdown/lib/ast-to-react';
 
 type MessageType = 'user' | 'bot';
 
 interface Message {
   type: MessageType;
   content: string;
+}
+
+interface CodeBlockProps {
+  inline?: boolean;
+  className?: string;
+  children: React.ReactNode;
 }
 
 export function ChatInterface() {
@@ -157,8 +162,7 @@ export function ChatInterface() {
                           <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             components={{
-                              code(props: CodeProps) {
-                                const { inline, className, children } = props;
+                              code({ inline, className, children }: CodeBlockProps) {
                                 const match = /language-(\w+)/.exec(className || '');
                                 return !inline && match ? (
                                   <SyntaxHighlighter
