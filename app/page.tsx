@@ -16,7 +16,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-// import { ChatInterface } from '@/components/chat-interface';
+import { ChatInterface } from '@/components/chat-interface';
 
 interface FloatingElementProps {
   children: ReactNode;
@@ -267,10 +267,19 @@ export default function Home() {
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const mailtoLink = `mailto:halleluyaholudele@gmail.com?subject=Contact from ${formData.name}&body=${formData.message}%0D%0A%0D%0AFrom: ${formData.email}`;
-    window.location.href = mailtoLink;
+    setIsLoading(true);
+    try {
+      const mailtoLink = `mailto:halleluyaholudele@gmail.com?subject=${encodeURIComponent(`Contact from ${formData.name}`)}&body=${encodeURIComponent(formData.message)}%0D%0A%0D%0AFrom: ${encodeURIComponent(formData.email)}`;
+      window.location.href = mailtoLink;
+    } catch (error) {
+      console.error('Error sending email:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const bioContent = `As a versatile software engineer with a passion for innovation, I've made significant strides in AI, blockchain, and full-stack development. My journey is marked by multiple hackathon victories and the creation of impactful solutions across various domains. From developing emotion detection systems to building secure blockchain voting platforms, I combine technical expertise with creative problem-solving to deliver cutting-edge solutions. As the founder of Oncolens, I'm working to revolutionize global pathology collaboration through technology. My diverse skill set spans backend technologies like Django and FastAPI to frontend frameworks like Next.js and React, complemented by extensive experience with AI tools including Cohere AI and Gemini AI.`;
@@ -642,9 +651,10 @@ export default function Home() {
                   <Button
                     type="submit"
                     className="w-full"
+                    disabled={isLoading}
                   >
                     <Send className="w-4 h-4 mr-2" />
-                    Send Message
+                    {isLoading ? 'Sending...' : 'Send Message'}
                   </Button>
                 </form>
               </CardContent>
@@ -654,7 +664,7 @@ export default function Home() {
       </main>
 
       <Footer />
-      {/* <ChatInterface /> */}
+      <ChatInterface />
     </div>
   );
 }

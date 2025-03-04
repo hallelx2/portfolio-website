@@ -1,51 +1,91 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Mail } from 'lucide-react';
+import { MessageSquare, X, Send, Loader2, Bot, User, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
-interface MessageAction {
-  type: 'email';
-  label: string;
-  href: string;
-}
+type MessageType = 'user' | 'bot';
 
 interface Message {
-  type: 'user' | 'bot';
+  type: MessageType;
   content: string;
-  action?: MessageAction;
 }
 
 export function ChatInterface() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { type: 'bot', content: "👋 Hi! I'm HDO's AI assistant. While I'm being developed, I can help you:" },
-    { type: 'bot', content: "• Send a message to HDO\n• Learn about his projects\n• Get quick responses to common questions" }
+    { type: 'bot', content: "👋 Hi! I'm HDO's AI assistant. How can I help you today?" },
   ]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
+  }, [messages]);
 
-    setMessages(prev => [...prev, { type: 'user', content: input }]);
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMessage = input.trim();
     setInput('');
+    setIsLoading(true);
+    setSuggestedQuestions([]);
 
-    // Simulate bot response
-    setTimeout(() => {
-      setMessages(prev => [...prev, {
-        type: 'bot',
-        content: "I'm still in development! For now, would you like to send an email to HDO?",
-        action: {
-          type: 'email',
-          label: 'Send Email',
-          href: `mailto:halleluyaholudele@gmail.com?subject=Chat Query&body=${encodeURIComponent(input)}`
-        }
-      }]);
-    }, 1000);
+    try {
+      setMessages(prev => [...prev, { type: 'user', content: userMessage }]);
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: messages.map(msg => ({
+            role: msg.type === 'user' ? 'user' : 'model',
+            content: msg.content
+          })).concat({
+            role: 'user',
+            content: userMessage
+          })
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to get response');
+
+      const data = await response.json();
+      setMessages(prev => [...prev, { type: 'bot', content: data.response }]);
+      if (data.suggestions) {
+        setSuggestedQuestions(data.suggestions);
+      }
+    } catch (error) {
+      console.error('Chat error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const messageVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
   };
 
   return (
@@ -58,8 +98,9 @@ export function ChatInterface() {
       >
         <Button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-12 h-12 rounded-full"
+          className="w-12 h-12 rounded-full shadow-lg hover:shadow-xl transition-shadow"
           size="icon"
+          variant="default"
         >
           {isOpen ? <X className="w-5 h-5" /> : <MessageSquare className="w-5 h-5" />}
         </Button>
@@ -74,42 +115,86 @@ export function ChatInterface() {
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="fixed bottom-20 right-4 w-[350px] z-50"
           >
-            <Card>
-              <CardHeader className="border-b">
-                <CardTitle className="text-lg">Chat with AI Assistant</CardTitle>
+            <Card className="shadow-xl border-2">
+              <CardHeader className="border-b bg-primary/5">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Bot className="w-5 h-5" />
+                  Chat with HDO's Assistant
+                </CardTitle>
               </CardHeader>
-              <ScrollArea className="h-[400px] p-4">
+              <ScrollArea className="h-[400px] p-4" ref={scrollAreaRef}>
                 <div className="space-y-4">
                   {messages.map((message, index) => (
-                    <div
+                    <motion.div
                       key={index}
+                      variants={messageVariants}
+                      initial="hidden"
+                      animate="visible"
+                      transition={{ delay: 0.1 * index }}
                       className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-[80%] rounded-lg p-3 ${
-                          message.type === 'user'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted'
+                        className={`flex gap-2 items-start max-w-[80%] ${
+                          message.type === 'user' ? 'flex-row-reverse' : 'flex-row'
                         }`}
                       >
-                        <p className="whitespace-pre-wrap text-sm">{message.content}</p>
-                        {message.action && (
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            className="mt-2"
-                            onClick={() => window.location.href = message.action!.href}
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          message.type === 'user' ? 'bg-primary' : 'bg-secondary'
+                        }`}>
+                          {message.type === 'user' ?
+                            <User className="w-4 h-4 text-primary-foreground" /> :
+                            <Bot className="w-4 h-4" />
+                          }
+                        </div>
+                        <div
+                          className={`rounded-lg p-3 ${
+                            message.type === 'user'
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-secondary/50'
+                          }`}
+                        >
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              code({ inline, className, children }) {
+                                const match = /language-(\w+)/.exec(className || '');
+                                return !inline && match ? (
+                                  <SyntaxHighlighter
+                                    style={oneDark}
+                                    language={match[1]}
+                                    PreTag="div"
+                                  >
+                                    {String(children).replace(/\n$/, '')}
+                                  </SyntaxHighlighter>
+                                ) : (
+                                  <code className={className}>
+                                    {children}
+                                  </code>
+                                );
+                              }
+                            }}
+                            className="prose prose-sm dark:prose-invert max-w-none"
                           >
-                            <Mail className="w-4 h-4 mr-2" />
-                            {message.action.label}
-                          </Button>
-                        )}
+                            {message.content}
+                          </ReactMarkdown>
+                        </div>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
+                  {isLoading && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex justify-start"
+                    >
+                      <div className="bg-secondary/50 rounded-lg p-3">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
               </ScrollArea>
-              <CardContent className="border-t p-4">
+              <CardContent className="border-t p-4 bg-primary/5">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -121,9 +206,19 @@ export function ChatInterface() {
                     placeholder="Type a message..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
+                    disabled={isLoading}
+                    className="bg-background"
                   />
-                  <Button type="submit" size="icon">
-                    <Send className="w-4 h-4" />
+                  <Button
+                    type="submit"
+                    size="icon"
+                    disabled={isLoading}
+                    className="shrink-0"
+                  >
+                    {isLoading ?
+                      <Loader2 className="w-4 h-4 animate-spin" /> :
+                      <Send className="w-4 h-4" />
+                    }
                   </Button>
                 </form>
               </CardContent>
