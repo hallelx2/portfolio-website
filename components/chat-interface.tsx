@@ -161,24 +161,6 @@ export function ChatInterface() {
                         >
                           <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
-                            components={{
-                              code({ inline, className, children }: CodeBlockProps) {
-                                const match = /language-(\w+)/.exec(className || '');
-                                return !inline && match ? (
-                                  <SyntaxHighlighter
-                                    style={oneDark}
-                                    language={match[1]}
-                                    PreTag="div"
-                                  >
-                                    {String(children).replace(/\n$/, '')}
-                                  </SyntaxHighlighter>
-                                ) : (
-                                  <code className={className}>
-                                    {children}
-                                  </code>
-                                );
-                              }
-                            }}
                             className="prose prose-sm dark:prose-invert max-w-none"
                           >
                             {message.content}
