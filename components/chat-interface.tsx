@@ -12,6 +12,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import type { CodeProps } from 'react-markdown/lib/ast-to-react';
 
 type MessageType = 'user' | 'bot';
 
@@ -156,7 +157,8 @@ export function ChatInterface() {
                           <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             components={{
-                              code({ inline, className, children }) {
+                              code(props: CodeProps) {
+                                const { inline, className, children } = props;
                                 const match = /language-(\w+)/.exec(className || '');
                                 return !inline && match ? (
                                   <SyntaxHighlighter
